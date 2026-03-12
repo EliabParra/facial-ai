@@ -1,0 +1,59 @@
+services:
+  # =========================================================
+  # Backend: FastAPI + DeepFace
+  # Procesa reconocimiento facial y análisis de emociones
+  # =========================================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: facial-ai-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/app:/app/app      # Hot-reload del código
+      - ./data:/data                 # Persistencia SQLite
+    environment:
+      - DATABASE_URL=sqlite:////data/database.db
+      - PYTHONUNBUFFERED=1
+    networks:
+      - facial-net
+    restart: unless-stopped
+
+  # =========================================================
+  # Frontend: Vue 3 + Vite + Tailwind CSS
+  # Interfaz de usuario para registro, reconocimiento y reportes
+  # =========================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: facial-ai-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend/src:/app/src      # Hot-reload del código
+      - ./frontend/index.html:/app/index.html
+    depends_on:
+      - backend
+    networks:
+      - facial-net
+    restart: unless-stopped
+
+  # =========================================================
+  # Adminer: Inspección y debugging de la base de datos
+  # =========================================================
+  adminer:
+    image: adminer:latest
+    container_name: facial-ai-adminer
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/data
+    networks:
+      - facial-net
+    restart: unless-stopped
+
+networks:
+  facial-net:
+    driver: bridge
