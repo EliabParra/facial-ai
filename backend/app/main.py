@@ -7,6 +7,14 @@ Configura la aplicación FastAPI con CORS, routers y eventos de startup.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+# Inicialización de la base de datos
+from app.database import engine, Base
+import app.models.persona  # noqa
+import app.models.deteccion  # noqa
+
+# Crea las tablas si no existen en SQLite
+Base.metadata.create_all(bind=engine)
+
 app = FastAPI(
     title="Facial-AI API",
     description="Sistema de Reconocimiento Facial con Análisis de Emociones",
