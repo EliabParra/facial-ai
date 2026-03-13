@@ -19,7 +19,7 @@ services:
       - TF_USE_LEGACY_KERAS=1
     networks:
       - facial-net
-    restart: unless-stopped
+    restart: "no"
 
   # =========================================================
   # Frontend: Vue 3 + Vite + Tailwind CSS
@@ -39,7 +39,7 @@ services:
       - backend
     networks:
       - facial-net
-    restart: unless-stopped
+    restart: "no"
 
   # =========================================================
   # Adminer: Inspección y debugging de la base de datos
@@ -53,7 +53,7 @@ services:
       - ./data:/data
     networks:
       - facial-net
-    restart: unless-stopped
+    restart: "no"
 
 networks:
   facial-net:
