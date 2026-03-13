@@ -1,0 +1,77 @@
+import { ref, onMounted, onUnmounted } from 'vue'
+
+export function useCamera() {
+  const videoElement = ref(null)
+  const isStreaming = ref(false)
+  const stream = ref(null)
+  const error = ref(null)
+
+  // Iniciar la cámara solicitando permisos al usuario
+  const startCamera = async () => {
+    try {
+      error.value = null
+      stream.value = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          width: { ideal: 1280 }, 
+          height: { ideal: 720 },
+          facingMode: "user" // Preferir cámara frontal
+        } 
+      })
+      
+      if (videoElement.value) {
+        videoElement.value.srcObject = stream.value
+        // Usar evento loadedmetadata en lugar de play() directo para evitar errores
+        videoElement.value.onloadedmetadata = () => {
+          videoElement.value.play()
+          isStreaming.value = true
+        }
+      }
+    } catch (err) {
+      console.error("Error accediendo a la cámara:", err)
+      error.value = "No se pudo acceder a la cámara. Verifica los permisos."
+      isStreaming.value = false
+    }
+  }
+
+  // Detener todos los tracks de la cámara
+  const stopCamera = () => {
+    if (stream.value) {
+      stream.value.getTracks().forEach(track => track.stop())
+      stream.value = null
+    }
+    if (videoElement.value) {
+      videoElement.value.srcObject = null
+    }
+    isStreaming.value = false
+  }
+
+  // Capturar frame actual como base64 (JPEG)
+  const captureFrame = (quality = 0.8) => {
+    if (!isStreaming.value || !videoElement.value) return null
+    
+    const canvas = document.createElement('canvas')
+    canvas.width = videoElement.value.videoWidth
+    canvas.height = videoElement.value.videoHeight
+    
+    const ctx = canvas.getContext('2d')
+    ctx.drawImage(videoElement.value, 0, 0, canvas.width, canvas.height)
+    
+    // Convertir a JPEG base64 (removiendo el prefijo para la API)
+    const dataUrl = canvas.toDataURL('image/jpeg', quality)
+    return dataUrl.split(',')[1] // Retorna solo el string base64
+  }
+
+  // Asegurarse de liberar recursos al destruir el componente
+  onUnmounted(() => {
+    stopCamera()
+  })
+
+  return {
+    videoElement,
+    isStreaming,
+    error,
+    startCamera,
+    stopCamera,
+    captureFrame
+  }
+}

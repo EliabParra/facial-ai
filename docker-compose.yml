@@ -9,13 +9,14 @@ services:
       dockerfile: Dockerfile
     container_name: facial-ai-backend
     ports:
-      - "8000:8000"
+      - "8001:8000"
     volumes:
       - ./backend/app:/app/app      # Hot-reload del código
       - ./data:/data                 # Persistencia SQLite
     environment:
       - DATABASE_URL=sqlite:////data/database.db
       - PYTHONUNBUFFERED=1
+      - TF_USE_LEGACY_KERAS=1
     networks:
       - facial-net
     restart: unless-stopped

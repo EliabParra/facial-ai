@@ -13,8 +13,9 @@ class PersonaBase(BaseModel):
 
 
 class PersonaCreate(PersonaBase):
-    # La lista de fotos en base64 se valida en la ruta, aquí definimos los datos de DB.
-    pass
+    # Lista de fotos en base64 para el registro.
+    # El usuario debe enviar al menos 1 foto.
+    fotos: list[str]
 
 
 class PersonaResponse(PersonaBase):
