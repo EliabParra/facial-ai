@@ -13,8 +13,7 @@ import app.models.persona  # noqa
 import app.models.deteccion  # noqa
 
 # Router imports
-from app.routers import personas
-from app.routers import reconocimiento
+from app.routers import personas, reconocimiento, reportes
 
 # Crea las tablas si no existen en SQLite
 Base.metadata.create_all(bind=engine)
@@ -25,18 +24,19 @@ app = FastAPI(
     version="0.1.0",
 )
 
-# CORS: Permitir peticiones desde el frontend en desarrollo
+# Configuración de CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://frontend:5173"],
+    allow_origins=["*"],  # En producción, especificar los orígenes permitidos
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Registrar routers
+# Conectar routers
 app.include_router(personas.router)
 app.include_router(reconocimiento.router)
+app.include_router(reportes.router)
 
 
 @app.get("/", tags=["Health"])
