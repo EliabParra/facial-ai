@@ -7,30 +7,35 @@ export function useCamera() {
   const error = ref(null)
 
   // Iniciar la cámara solicitando permisos al usuario
-  const startCamera = async () => {
-    try {
-      error.value = null
-      stream.value = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
-          width: { ideal: 1280 }, 
-          height: { ideal: 720 },
-          facingMode: "user" // Preferir cámara frontal
-        } 
-      })
-      
-      if (videoElement.value) {
-        videoElement.value.srcObject = stream.value
-        // Usar evento loadedmetadata en lugar de play() directo para evitar errores
-        videoElement.value.onloadedmetadata = () => {
-          videoElement.value.play()
-          isStreaming.value = true
+  const startCamera = () => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        error.value = null
+        stream.value = await navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            width: { ideal: 1280 }, 
+            height: { ideal: 720 },
+            facingMode: "user" 
+          } 
+        })
+        
+        if (videoElement.value) {
+          videoElement.value.srcObject = stream.value
+          videoElement.value.onloadedmetadata = () => {
+            videoElement.value.play()
+            isStreaming.value = true
+            resolve(true) // Promesa resuelta solo cuando está 100% reproduciendo
+          }
+        } else {
+          reject(new Error("Elemento de video no encontrado en el DOM"))
         }
+      } catch (err) {
+        console.error("Error accediendo a la cámara:", err)
+        error.value = "No se pudo acceder a la cámara. Verifica los permisos."
+        isStreaming.value = false
+        reject(err)
       }
-    } catch (err) {
-      console.error("Error accediendo a la cámara:", err)
-      error.value = "No se pudo acceder a la cámara. Verifica los permisos."
-      isStreaming.value = false
-    }
+    })
   }
 
   // Detener todos los tracks de la cámara

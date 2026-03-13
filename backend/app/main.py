@@ -14,6 +14,7 @@ import app.models.deteccion  # noqa
 
 # Router imports
 from app.routers import personas
+from app.routers import reconocimiento
 
 # Crea las tablas si no existen en SQLite
 Base.metadata.create_all(bind=engine)
@@ -35,6 +36,7 @@ app.add_middleware(
 
 # Registrar routers
 app.include_router(personas.router)
+app.include_router(reconocimiento.router)
 
 
 @app.get("/", tags=["Health"])
